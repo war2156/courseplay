@@ -126,7 +126,7 @@ function courseplay:loadCourse(vehicle, id, useRealId, addCourseAtEnd) -- fn is 
 		--	courseplay:clearCurrentLoadedCourse(vehicle)
 		if #vehicle.Waypoints == 0 then
 			vehicle.cp.numCourses = 1;
-			vehicle.Waypoints = course.waypoints
+			vehicle.Waypoints = courseplay.utils.table.copy(course.waypoints, true);
 			vehicle.cp.numWaypoints = #vehicle.Waypoints;
 			vehicle:setCpVar('currentCourseName',course.name,courseplay.isClient)
 
@@ -146,7 +146,7 @@ function courseplay:loadCourse(vehicle, id, useRealId, addCourseAtEnd) -- fn is 
 			courseplay:debug(string.format("course_management %d: %s: currentCourseName=%q, numCourses=%s -> add new course %q", debug.getinfo(1).currentline, nameNum(vehicle), tostring(vehicle.cp.currentCourseName), tostring(vehicle.cp.numCourses), tostring(course.name)), 8);
 
 
-			local course1, course2 = vehicle.Waypoints, course.waypoints;
+			local course1, course2 = vehicle.Waypoints, courseplay.utils.table.copy(course.waypoints, true);
 			local numCourse1, numCourse2 = #course1, #course2;
 			local course1wp, course2wp = numCourse1, 1;
 
