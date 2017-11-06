@@ -928,6 +928,22 @@ function courseplay:update(dt)
 				self:setCourseplayFunc('setCpMode', self.cp.nextMode, false, 1);
 			elseif self.cp.canSwitchMode and self.cp.prevMode and InputBinding.hasEvent(InputBinding.COURSEPLAY_PREVMODE) then
 				self:setCourseplayFunc('setCpMode', self.cp.prevMode, false, 1);
+			elseif not self.cp.isRecording and InputBinding.isPressed(InputBinding.COURSEPLAY_NEXTWAYPOINT) then
+				if courseplay:keyboardShouldExecuteRepeatingKeyBinding(dt, InputBinding.COURSEPLAY_NEXTWAYPOINT) then
+					if self.cp.waypointIndex == self.cp.numWaypoints then
+						self:setCourseplayFunc('setWaypointIndex', 1, false);
+					else
+						self:setCourseplayFunc('setWaypointIndex', self.cp.waypointIndex + 1, false);
+					end
+				end
+			elseif not self.cp.isRecording and InputBinding.isPressed(InputBinding.COURSEPLAY_PREVWAYPOINT) then
+				if courseplay:keyboardShouldExecuteRepeatingKeyBinding(dt, InputBinding.COURSEPLAY_PREVWAYPOINT) then
+					if self.cp.waypointIndex == 1 then
+						self:setCourseplayFunc('setWaypointIndex', self.cp.numWaypoints, false);
+					else
+						self:setCourseplayFunc('setWaypointIndex', self.cp.waypointIndex - 1, false);
+					end
+				end
 			end;
 
 			if not self.cp.openHudWithMouse and InputBinding.hasEvent(InputBinding.COURSEPLAY_HUD) then

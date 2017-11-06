@@ -17,6 +17,7 @@ local diamondColors = {
 	regular   = { 1.000, 0.212, 0.000, 1.000 }; -- orange
 	turnStart = { 0.200, 0.900, 0.000, 1.000 }; -- green
 	turnEnd   = { 0.896, 0.000, 0.000, 1.000 }; -- red
+	current   = { 0.000, 0.000, 1.000, 1.000 }; -- blue
 };
 
 function courseplay.signs:setup()
@@ -47,6 +48,13 @@ function courseplay.signs:setup()
 	end;
 end;
 
+function courseplay.signs:setCurrent(vehicle)
+	if vehicle.cp.currentSignIndex ~= nil then
+		self:setNotCurrentColor(vehicle.cp.signs.current[vehicle.cp.currentSignIndex]);
+	end
+	vehicle.cp.currentSignIndex = vehicle.cp.waypointIndex;
+	self:setCurrentColor(vehicle.cp.signs.current[vehicle.cp.currentSignIndex]);
+end
 
 function courseplay.signs:addSign(vehicle, signType, x, z, rotX, rotY, insertIndex, distanceToNext, diamondColor)
 	signType = signType or 'normal';
@@ -263,6 +271,19 @@ function courseplay.signs:setSignColor(signData, colorName)
 	end;
 end;
 
+function courseplay.signs:setCurrentColor(signData)
+	if signData then
+		local x,y,z,w = unpack(diamondColors['current']);
+		setShaderParameter(signData.sign, 'diffuseColor', x,y,z,w, false);
+	end
+end;
+
+function courseplay.signs:setNotCurrentColor(signData)
+	if signData then
+		local x,y,z,w = unpack(diamondColors[signData.color]);
+		setShaderParameter(signData.sign, 'diffuseColor', x,y,z,w, false);
+	end
+end;
 
 function courseplay.signs:deleteSign(sign)
 	unlink(sign);
@@ -313,4 +334,6 @@ function courseplay.signs:setSignsVisibility(vehicle, forceHide)
 
 		setVisibility(signData.sign, vis);
 	end;
+
+	self:setCurrent(vehicle);
 end;

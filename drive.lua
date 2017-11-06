@@ -1712,6 +1712,7 @@ function courseplay:setWaypointIndex(vehicle, number)
 		else
 			vehicle.cp.previousWaypointIndex = 1;
 		end;
+		courseplay.signs:setCurrent(vehicle);
 	end;
 end;
 
