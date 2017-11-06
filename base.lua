@@ -856,41 +856,88 @@ function courseplay:drawWaypointsLines(vehicle)
 	end;
 end;
 
+function courseplay:keyboardBeginProcessing(dt)
+	self.foundKey = false;
+end
+
+function courseplay:keyboardEndProcessing(dt)
+	if not self.foundKey and self.lastKeypress then
+		self.lastKeypress = nil;
+		self.keypressDt = nil;
+		self.nextKeypressDt = nil;
+	end
+end
+
+function courseplay:keyboardGetTimeRangedValue(maxMilliseconds, low, high)
+	local ms = Utils.clamp(self.keypressDt - 500, 0, maxMilliseconds);
+	local percent = ms / maxMilliseconds;
+
+	return low + (high - low) * percent;
+end
+
+function courseplay:keyboardShouldExecuteRepeatingKeyBinding(dt, keyBinding)
+	local performAction = false;
+	self.foundKey = true;
+
+	if self.lastKeypress == keyBinding then
+		self.keypressDt = self.keypressDt + dt;
+		if self.nextKeypressDt < self.keypressDt then
+			performAction = true;
+			self.nextKeypressDt = self.keypressDt + 200;
+		end
+	else
+		performAction = true;
+		self.lastKeypress = keyBinding;
+		self.keypressDt = dt;
+		self.nextKeypressDt = self.keypressDt + 500;
+	end
+
+	return performAction;
+end
+
 function courseplay:update(dt)
 
-	-- KEYBOARD EVENTS
-	if self:getIsActive() and self.isEntered and InputBinding.isPressed(InputBinding.COURSEPLAY_MODIFIER) then
-		if InputBinding.hasEvent(InputBinding.COURSEPLAY_START_STOP) then
-			if self.cp.canDrive then
-				if self.cp.isDriving then
-					self:setCourseplayFunc('stop', nil, false, 1);
-				else
-					self:setCourseplayFunc('start', nil, false, 1);
-				end;
-			else
-				if not self.cp.isRecording and not self.cp.recordingIsPaused and self.cp.numWaypoints == 0 then
-					self:setCourseplayFunc('start_record', nil, false, 1);
-				elseif self.cp.isRecording and not self.cp.recordingIsPaused and not self.cp.isRecordingTurnManeuver then
-					self:setCourseplayFunc('stop_record', nil, false, 1);
-				end;
-			end;
-		elseif InputBinding.hasEvent(InputBinding.COURSEPLAY_CANCELWAIT) and self.cp.HUD1wait and self.cp.canDrive and self.cp.isDriving then
-			self:setCourseplayFunc('cancelWait', true, false, 1);
-		elseif InputBinding.hasEvent(InputBinding.COURSEPLAY_DRIVENOW) and self.cp.HUD1noWaitforFill and self.cp.canDrive and self.cp.isDriving then
-			self:setCourseplayFunc('setIsLoaded', true, false, 1);
-		elseif InputBinding.hasEvent(InputBinding.COURSEPLAY_STOP_AT_END) and self.cp.canDrive and self.cp.isDriving then
-			self:setCourseplayFunc('setStopAtEnd', not self.cp.stopAtEnd, false, 1);
-		elseif self.cp.canSwitchMode and self.cp.nextMode and InputBinding.hasEvent(InputBinding.COURSEPLAY_NEXTMODE) then
-			self:setCourseplayFunc('setCpMode', self.cp.nextMode, false, 1);
-		elseif self.cp.canSwitchMode and self.cp.prevMode and InputBinding.hasEvent(InputBinding.COURSEPLAY_PREVMODE) then
-			self:setCourseplayFunc('setCpMode', self.cp.prevMode, false, 1);
-		end;
 
-		if not self.cp.openHudWithMouse and InputBinding.hasEvent(InputBinding.COURSEPLAY_HUD) then
-			self:setCourseplayFunc('openCloseHud', not self.cp.hud.show, true);
-		end;
-	end; -- self:getIsActive() and self.isEntered and modifierPressed
-	
+	-- KEYBOARD EVENTS
+	if self:getIsActive() and self.isEntered then
+
+		courseplay:keyboardBeginProcessing(dt)
+
+		if InputBinding.isPressed(InputBinding.COURSEPLAY_MODIFIER) then
+			if InputBinding.hasEvent(InputBinding.COURSEPLAY_START_STOP) then
+				if self.cp.canDrive then
+					if self.cp.isDriving then
+						self:setCourseplayFunc('stop', nil, false, 1);
+					else
+						self:setCourseplayFunc('start', nil, false, 1);
+					end;
+				else
+					if not self.cp.isRecording and not self.cp.recordingIsPaused and self.cp.numWaypoints == 0 then
+						self:setCourseplayFunc('start_record', nil, false, 1);
+					elseif self.cp.isRecording and not self.cp.recordingIsPaused and not self.cp.isRecordingTurnManeuver then
+						self:setCourseplayFunc('stop_record', nil, false, 1);
+					end;
+				end;
+			elseif InputBinding.hasEvent(InputBinding.COURSEPLAY_CANCELWAIT) and self.cp.HUD1wait and self.cp.canDrive and self.cp.isDriving then
+				self:setCourseplayFunc('cancelWait', true, false, 1);
+			elseif InputBinding.hasEvent(InputBinding.COURSEPLAY_DRIVENOW) and self.cp.HUD1noWaitforFill and self.cp.canDrive and self.cp.isDriving then
+				self:setCourseplayFunc('setIsLoaded', true, false, 1);
+			elseif InputBinding.hasEvent(InputBinding.COURSEPLAY_STOP_AT_END) and self.cp.canDrive and self.cp.isDriving then
+				self:setCourseplayFunc('setStopAtEnd', not self.cp.stopAtEnd, false, 1);
+			elseif self.cp.canSwitchMode and self.cp.nextMode and InputBinding.hasEvent(InputBinding.COURSEPLAY_NEXTMODE) then
+				self:setCourseplayFunc('setCpMode', self.cp.nextMode, false, 1);
+			elseif self.cp.canSwitchMode and self.cp.prevMode and InputBinding.hasEvent(InputBinding.COURSEPLAY_PREVMODE) then
+				self:setCourseplayFunc('setCpMode', self.cp.prevMode, false, 1);
+			end;
+
+			if not self.cp.openHudWithMouse and InputBinding.hasEvent(InputBinding.COURSEPLAY_HUD) then
+				self:setCourseplayFunc('openCloseHud', not self.cp.hud.show, true);
+			end;
+		end; -- modifierPressed
+
+		courseplay:keyboardEndProcessing(dt)
+	end; -- self:getIsActive() and self.isEntered
+
 	if not self.cp.remoteIsEntered then
 		if self.cp.isEntered ~= self.isEntered then
 			CourseplayEvent.sendEvent(self, "self.cp.remoteIsEntered",self.isEntered)
