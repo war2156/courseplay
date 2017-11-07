@@ -246,6 +246,8 @@ function courseplay:load(savegame)
 		max = self.cruiseControl.maxSpeed or 60;
 	};
 
+	self.cp.enhancedMergeRadius = 5;
+
 	self.cp.tooIsDirty = false
 	self.cp.orgRpm = nil;
 	
@@ -1000,6 +1002,14 @@ function courseplay:update(dt)
 				self:setCourseplayFunc('insertNewWaypoint', null, false);
 			elseif not self.cp.isRecording and InputBinding.hasEvent(InputBinding.COURSEPLAY_DELETEWP) then
 				self:setCourseplayFunc('deleteWaypoint', null, false);
+			elseif InputBinding.isPressed(InputBinding.COURSEPLAY_INCREASEMERGERADIUS) then
+				if courseplay:keyboardShouldExecuteRepeatingKeyBinding(dt, InputBinding.COURSEPLAY_INCREASEMERGERADIUS) then
+					self:setCourseplayFunc('changeEnhancedMergeRadius', 1);
+				end
+			elseif InputBinding.isPressed(InputBinding.COURSEPLAY_DECREASEMERGERADIUS) then
+				if courseplay:keyboardShouldExecuteRepeatingKeyBinding(dt, InputBinding.COURSEPLAY_DECREASEMERGERADIUS) then
+					self:setCourseplayFunc('changeEnhancedMergeRadius', -1);
+				end
 			end;
 
 			if not self.cp.openHudWithMouse and InputBinding.hasEvent(InputBinding.COURSEPLAY_HUD) then

@@ -151,6 +151,7 @@ function courseplay.hud:setup()
 		version = self:pxToNormal(11, 'y');
 		infoText = self:pxToNormal(16, 'y');
 		editCourseInfo = self:pxToNormal(13, 'y');
+		enhancedMergeInfo = self:pxToNormal(13, 'y');
 	};
 	self.numPages = 10;
 	self.numLines = 8;
@@ -204,6 +205,8 @@ function courseplay.hud:setup()
 	self.versionPosY = self.visibleArea.y1 + self:pxToNormal(16, 'y');
 	self.editCourseInfoY = self.visibleArea.y1 + self:pxToNormal(3, 'y');
 	self.editCourseInfoX = self.contentMaxX - self:pxToNormal(65, 'x');
+	self.enhancedMergeInfoY = self.editCourseInfoY + self.fontSizes.editCourseInfo;
+	self.enhancedMergeInfoX = self.contentMaxX - self:pxToNormal(65, 'x');
 
 	-- PAGE TITLES
 	self.pageTitles = {
@@ -464,6 +467,12 @@ function courseplay.hud:setContent(vehicle)
 		vehicle.cp.hud.content.bottomInfo.editCourseInfo = nil;
 	end
 
+	if vehicle.cp.enhancedMergeRadius >= 0 then
+		vehicle.cp.hud.content.bottomInfo.enhancedMergeInfo = "Enhanced Merge Radius: " .. tostring(vehicle.cp.enhancedMergeRadius) .. "m";
+	else
+		vehicle.cp.hud.content.bottomInfo.enhancedMergeInfo = nil;
+	end
+
 	if vehicle.Waypoints[vehicle.cp.waypointIndex] ~= nil or vehicle.cp.isRecording or vehicle.cp.recordingIsPaused or g_server == nil then
 		-- waypoints
 		if not vehicle.cp.isRecording and not vehicle.cp.recordingIsPaused then
@@ -607,6 +616,10 @@ function courseplay.hud:renderHud(vehicle)
 		renderText(self.editCourseInfoX, self.editCourseInfoY, self.fontSizes.editCourseInfo, vehicle.cp.hud.content.bottomInfo.editCourseInfo);
 	end
 
+	if vehicle.cp.hud.content.bottomInfo.enhancedMergeInfo ~= nil then
+		courseplay:setFontSettings('white', false, 'right');
+		renderText(self.enhancedMergeInfoX, self.enhancedMergeInfoY, self.fontSizes.enhancedMergeInfo, vehicle.cp.hud.content.bottomInfo.enhancedMergeInfo);
+	end
 
 	-- HUD TITLES
 	courseplay:setFontSettings('white', true, 'left');

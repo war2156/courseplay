@@ -148,56 +148,44 @@ function courseplay:loadCourse(vehicle, id, useRealId, addCourseAtEnd) -- fn is 
 
 			local course1, course2 = vehicle.Waypoints, courseplay.utils.table.copy(course.waypoints, true);
 			local numCourse1, numCourse2 = #course1, #course2;
-			local course1wp, course2wp = numCourse1, 1;
 
-			--find crossing points, merge at first pair where dist < 50
-			local firstMatchFound, closestMatchFound = false, false;
-			local useFirstMatch = false; --true: first match <50m is used to merge / false: match with closest distance <50m is used to merge;
+			local turnWaypoints, course1wp, course2wp;
 			if not addCourseAtEnd then
-				--find crossing points
-				local crossingPoints = { [1] = {}, [2] = {} };
-				for i=vehicle.cp.lastMergedWP + 1, numCourse1 do
-					if i > 1 and course1[i].crossing == true and not course1[i].merged then
-						courseplay:debug('course1 wp ' .. i .. ': add to crossingPoints[1]', 8);
-						table.insert(crossingPoints[1], i);
+				turnWaypoints, course1wp, course2wp = courseplay:enhancedCourseMerge(course1, course2, vehicle.cp.waypointIndex, vehicle.cp.enhancedMergeRadius, 50)
+			else
+				course1wp, course2wp = numCourse1, 1;
+
+				--find crossing points, merge at first pair where dist < 50
+				local firstMatchFound, closestMatchFound = false, false;
+				local useFirstMatch = false; --true: first match <50m is used to merge / false: match with closest distance <50m is used to merge;
+				if not addCourseAtEnd then
+					--find crossing points
+					local crossingPoints = { [1] = {}, [2] = {} };
+					for i=vehicle.cp.lastMergedWP + 1, numCourse1 do
+						if i > 1 and course1[i].crossing == true and not course1[i].merged then
+							courseplay:debug('course1 wp ' .. i .. ': add to crossingPoints[1]', 8);
+							table.insert(crossingPoints[1], i);
+						end;
 					end;
-				end;
-				for i,wp in pairs(course2) do
-					if i < numCourse2 and wp.crossing == true and not wp.merged then
-						courseplay:debug('course2 wp ' .. i .. ': add to crossingPoints[2]', 8);
-						table.insert(crossingPoints[2], i);
+					for i,wp in pairs(course2) do
+						if i < numCourse2 and wp.crossing == true and not wp.merged then
+							courseplay:debug('course2 wp ' .. i .. ': add to crossingPoints[2]', 8);
+							table.insert(crossingPoints[2], i);
+						end;
 					end;
-				end;
-				courseplay:debug(string.format('course 1 has %d crossing points (excluding first point), course 2 has %d crossing points (excluding last point), useFirstMatch=%s', #crossingPoints[1], #crossingPoints[2], tostring(useFirstMatch)), 8);
+					courseplay:debug(string.format('course 1 has %d crossing points (excluding first point), course 2 has %d crossing points (excluding last point), useFirstMatch=%s', #crossingPoints[1], #crossingPoints[2], tostring(useFirstMatch)), 8);
 
-				--find < 50m match
-				local smallestDist = math.huge;
-				if #crossingPoints[1] > 0 and #crossingPoints[2] > 0 then
-					for _,wpNum1 in pairs(crossingPoints[1]) do
-						local wp1 = course1[wpNum1];
-						for _,wpNum2 in pairs(crossingPoints[2]) do
-							local wp2 = course2[wpNum2];
-							local dist = courseplay:distance(wp1.cx, wp1.cz, wp2.cx, wp2.cz);
-							courseplay:debug(string.format('course1 wp %d, course2 wp %d, dist=%s', wpNum1, wpNum2, tostring(dist)), 8);
-							if dist and dist ~= 0 and dist < 50 then
-								if useFirstMatch then
-									course1wp = wpNum1;
-									course2wp = wpNum2;
-
-									vehicle.cp.lastMergedWP = wpNum1;
-									course1[course1wp].merged = true;
-									course2[course2wp].merged = true;
-
-									firstMatchFound = true;
-									courseplay:debug(string.format('\tuseFirstMatch=true -> 2 valid crossing points found: (1)=#%d, (2)=#%d, dist=%.1f -> lastMergedWP=%d, set "merged" for both to "true", break', course1wp, course2wp, dist, vehicle.cp.lastMergedWP), 8);
-								else
-									if dist < smallestDist then
-										smallestDist = dist;
-
-										--remove previous 'merged' vars
-										course1[course1wp].merged = nil;
-										course2[course2wp].merged = nil;
-
+					--find < 50m match
+					local smallestDist = math.huge;
+					if #crossingPoints[1] > 0 and #crossingPoints[2] > 0 then
+						for _,wpNum1 in pairs(crossingPoints[1]) do
+							local wp1 = course1[wpNum1];
+							for _,wpNum2 in pairs(crossingPoints[2]) do
+								local wp2 = course2[wpNum2];
+								local dist = courseplay:distance(wp1.cx, wp1.cz, wp2.cx, wp2.cz);
+								courseplay:debug(string.format('course1 wp %d, course2 wp %d, dist=%s', wpNum1, wpNum2, tostring(dist)), 8);
+								if dist and dist ~= 0 and dist < 50 then
+									if useFirstMatch then
 										course1wp = wpNum1;
 										course2wp = wpNum2;
 
@@ -205,54 +193,83 @@ function courseplay:loadCourse(vehicle, id, useRealId, addCourseAtEnd) -- fn is 
 										course1[course1wp].merged = true;
 										course2[course2wp].merged = true;
 
-										closestMatchFound = true;
-										courseplay:debug(string.format('\tuseFirstMatch=false -> 2 valid crossing points found: (1)=#%d, (2)=#%d, dist=%.1f -> lastMergedWP=%d, set "merged" for both to "true", continue', course1wp, course2wp, dist, vehicle.cp.lastMergedWP), 8);
+										firstMatchFound = true;
+										courseplay:debug(string.format('\tuseFirstMatch=true -> 2 valid crossing points found: (1)=#%d, (2)=#%d, dist=%.1f -> lastMergedWP=%d, set "merged" for both to "true", break', course1wp, course2wp, dist, vehicle.cp.lastMergedWP), 8);
+									else
+										if dist < smallestDist then
+											smallestDist = dist;
+
+											--remove previous 'merged' vars
+											course1[course1wp].merged = nil;
+											course2[course2wp].merged = nil;
+
+											course1wp = wpNum1;
+											course2wp = wpNum2;
+
+											vehicle.cp.lastMergedWP = wpNum1;
+											course1[course1wp].merged = true;
+											course2[course2wp].merged = true;
+
+											closestMatchFound = true;
+											courseplay:debug(string.format('\tuseFirstMatch=false -> 2 valid crossing points found: (1)=#%d, (2)=#%d, dist=%.1f -> lastMergedWP=%d, set "merged" for both to "true", continue', course1wp, course2wp, dist, vehicle.cp.lastMergedWP), 8);
+										end;
 									end;
 								end;
+								if firstMatchFound then break; end;
 							end;
 							if firstMatchFound then break; end;
 						end;
-						if firstMatchFound then break; end;
 					end;
 				end;
-			end;
 
-			if not addCourseAtEnd then
-				if firstMatchFound or closestMatchFound then
-					courseplay:debug(string.format('%s: merge points found: course 1: #%d, course 2: #%d', nameNum(vehicle), course1wp, course2wp), 8);
-				else
-					courseplay:debug(string.format('%s: no points where the courses could be merged have been found -> add 2nd course at end', nameNum(vehicle)), 8);
+				if not addCourseAtEnd then
+					if firstMatchFound or closestMatchFound then
+						courseplay:debug(string.format('%s: merge points found: course 1: #%d, course 2: #%d', nameNum(vehicle), course1wp, course2wp), 8);
+					else
+						courseplay:debug(string.format('%s: no points where the courses could be merged have been found -> add 2nd course at end', nameNum(vehicle)), 8);
+					end;
 				end;
-			end;
+			end
 
-			vehicle.Waypoints = {};
-			for i=1, course1wp do
-				table.insert(vehicle.Waypoints, course1[i]);
-			end;
-			for i=course2wp, numCourse2 do
-				table.insert(vehicle.Waypoints, course2[i]);
-			end;
+			if course1wp ~= nil and course2wp ~= nil  then
+				vehicle.Waypoints = {};
+				for i=1, course1wp do
+					table.insert(vehicle.Waypoints, course1[i]);
+				end;
 
-			vehicle.cp.numWaypoints = #vehicle.Waypoints;
-			vehicle.cp.numCourses = vehicle.cp.numCourses + 1;
-			vehicle:setCpVar('currentCourseName',string.format("%d %s", vehicle.cp.numCourses, courseplay:loc('COURSEPLAY_COMBINED_COURSES')),courseplay.isClient);
+				local speed = course1[course1wp].speed; -- take last speed
 
-			-- for turn maneuver
-			if not vehicle.cp.courseWorkWidth then
-				vehicle.cp.courseWorkWidth = course.workWidth;
-				--Place here to prevent it being reset back to one multi Tool on course addition when course isn't auto generated
-				course.multiTools = course.multiTools or 1
-				courseplay:changeMultiTools(vehicle, nil, course.multiTools)
-			end;
-			if not vehicle.cp.courseNumHeadlandLanes then
-				vehicle.cp.courseNumHeadlandLanes = course.numHeadlandLanes;
-			end;
-			if vehicle.cp.courseHeadlandDirectionCW == nil then
-				vehicle.cp.courseHeadlandDirectionCW = course.headlandDirectionCW;
-			end;
+				if turnWaypoints ~= nil then
+					for turnWaypointIndex = 1, #turnWaypoints do
+						table.insert(vehicle.Waypoints, { cx = turnWaypoints[turnWaypointIndex].cx, cz = turnWaypoints[turnWaypointIndex].cz, angle = angle, wait = nil, rev = nil, crossing = nil, speed = speed, turn = nil, turnStart = nil, turnEnd = nil });
+					end
+				end
+
+				for i=course2wp, numCourse2 do
+					table.insert(vehicle.Waypoints, course2[i]);
+				end;
+
+				vehicle.cp.numWaypoints = #vehicle.Waypoints;
+				vehicle.cp.numCourses = vehicle.cp.numCourses + 1;
+				vehicle:setCpVar('currentCourseName',string.format("%d %s", vehicle.cp.numCourses, courseplay:loc('COURSEPLAY_COMBINED_COURSES')),courseplay.isClient);
+
+				-- for turn maneuver
+				if not vehicle.cp.courseWorkWidth then
+					vehicle.cp.courseWorkWidth = course.workWidth;
+					--Place here to prevent it being reset back to one multi Tool on course addition when course isn't auto generated
+					course.multiTools = course.multiTools or 1
+					courseplay:changeMultiTools(vehicle, nil, course.multiTools)
+				end;
+				if not vehicle.cp.courseNumHeadlandLanes then
+					vehicle.cp.courseNumHeadlandLanes = course.numHeadlandLanes;
+				end;
+				if vehicle.cp.courseHeadlandDirectionCW == nil then
+					vehicle.cp.courseHeadlandDirectionCW = course.headlandDirectionCW;
+				end;
 			
 			
-			courseplay:debug(string.format('%s: adding course done -> numWaypoints=%d, numCourses=%s, currentCourseName=%q', nameNum(vehicle), vehicle.cp.numWaypoints, vehicle.cp.numCourses, vehicle.cp.currentCourseName), 8);
+				courseplay:debug(string.format('%s: adding course done -> numWaypoints=%d, numCourses=%s, currentCourseName=%q', nameNum(vehicle), vehicle.cp.numWaypoints, vehicle.cp.numCourses, vehicle.cp.currentCourseName), 8);
+			end
 		end;
 
 		vehicle.cp.canDrive = true;
@@ -1497,3 +1514,167 @@ function courseplay:normalizeUTF8(str)
 	return str:lower();
 end;
 
+function courseplay:coordDistFromEndPoint(point1, point2, dist, extend)
+    local segmentLength = courseplay:distance(point1.cx, point1.cz, point2.cx, point2.cz);
+	if extend then
+		extend = segmentLength;
+	else
+		extend = 0;
+	end
+	return { 
+		cx = point1.cx + (point2.cx - point1.cx) / segmentLength * (extend + dist), 
+		cz = point1.cz + (point2.cz - point1.cz) / segmentLength * (extend + dist) 
+	};
+end
+
+function courseplay:segmentsIntersectionWithPoints(segment1Start, segment1End, segment2Start, segment2End)
+	local intersectionPoint = courseplay:segmentsIntersection(segment1Start.cx, segment1Start.cz, segment1End.cx, segment1End.cz, segment2Start.cx, segment2Start.cz, segment2End.cx,segment2End.cz);
+	if intersectionPoint ~= nil then
+		return { cx = intersectionPoint.x, cz = intersectionPoint.z }
+	end
+	return nil;
+end
+
+function Mult_V_S(leftVector, rightScaler)
+  return { cx = leftVector.cx * rightScaler, cz = leftVector.cz * rightScaler };
+end
+
+function Mult_S_V(leftScaler, rightVector)
+  return Mult_V_S(rightVector, leftScaler);
+end
+
+function Add_V_V(leftVector, rightVector)
+  return { cx = leftVector.cx + rightVector.cx, cz = leftVector.cz + rightVector.cz };
+end
+
+
+function CalculateBezierPoint(t, p0, p1, p2, p3)
+  if p3 == nil then
+    p3 = p2;
+    p2 = p1;
+  end
+  local u = 1 - t;
+  local tt = t * t;
+  local uu = u * u;
+  local uuu = uu * u;
+  local ttt = tt * t;
+ 
+  local p = Mult_S_V(uuu, p0); --first term
+  p = Add_V_V(p, Mult_S_V(3 * uu * t, p1)); --second term
+  p = Add_V_V(p, Mult_S_V(3 * u * tt, p2)); --third term
+  p = Add_V_V(p, Mult_S_V(ttt, p3)); --fourth term
+ 
+  return p;
+end
+
+function courseplay:enhancedCourseMerge(course1, course2, course1StartWaypointIndex, mergeRadius, additionalSearchDistance)
+	local course1LastWaypointIndex, course2LastWaypointIndex = #course1, #course2;
+
+	if course1LastWaypointIndex < 2 or course2LastWaypointIndex < 2 then
+		return;
+	end
+	
+	local intersectionPoint = nil;
+
+	-- Find the first intersection point of course 1 with course 2.  
+	-- The search on course 1 will start at the <course1StartWaypointIndex> to the point <additionalSearchDistance> meters after the last waypoint.
+	-- The search on course 2 will start at the point <additionalSearchDistance> meters before the first waypoint to the last waypoint.
+	local course1WaypointIndex = course1StartWaypointIndex;
+	local course2WaypointIndex;
+	while intersectionPoint == nil and course1WaypointIndex <= course1LastWaypointIndex do
+		local course1SegmentStartWaypoint, course1SegmentEndWaypoint;
+		
+		if course1WaypointIndex == course1LastWaypointIndex then
+			course1SegmentStartWaypoint = course1[course1LastWaypointIndex];
+			course1SegmentEndWaypoint = courseplay:coordDistFromEndPoint(course1[course1LastWaypointIndex-1], course1[course1LastWaypointIndex], additionalSearchDistance, true);
+		else
+			course1SegmentStartWaypoint = course1[course1WaypointIndex];
+			course1SegmentEndWaypoint = course1[course1WaypointIndex+1];
+		end
+		
+		course2WaypointIndex = 0;
+		while intersectionPoint == nil and course2WaypointIndex <= course2LastWaypointIndex - 1 do
+			local course2SegmentStartWaypoint, course2SegmentEndWaypoint;
+			
+			if course2WaypointIndex == 0 then
+				course2SegmentStartWaypoint = courseplay:coordDistFromEndPoint(course2[2], course2[1], additionalSearchDistance, true);
+				course2SegmentEndWaypoint = course2[1];
+			else
+				course2SegmentStartWaypoint = course2[course2WaypointIndex];
+				course2SegmentEndWaypoint = course2[course2WaypointIndex+1];
+			end
+			
+
+			intersectionPoint = courseplay:segmentsIntersectionWithPoints(course1SegmentStartWaypoint, course1SegmentEndWaypoint, course2SegmentStartWaypoint, course2SegmentEndWaypoint);
+			
+			course2WaypointIndex = course2WaypointIndex + 1;
+		end
+		course1WaypointIndex = course1WaypointIndex + 1;
+	end
+	course1WaypointIndex = course1WaypointIndex - 1;
+	
+	if intersectionPoint == nil then
+		return;
+	end
+
+	-- Determine <course1CurveStartPoint> on course1 <mergeRadius> meters back from the intersection point
+	local course1CurveStartPoint;
+	local segStart = intersectionPoint;
+	local segEnd = course1[course1WaypointIndex];
+	local remainingDistance = mergeRadius;
+	while course1CurveStartPoint == nil do
+		remainingDistance = remainingDistance - courseplay:distance(segStart.cx, segStart.cz, segEnd.cx, segEnd.cz);
+		if remainingDistance > 0 then
+			if course1WaypointIndex > 1 then
+				segStart = segEnd;
+				course1WaypointIndex = course1WaypointIndex - 1;
+				segEnd = course1[course1WaypointIndex];
+			else
+				course1CurveStartPoint = segEnd
+			end
+		else
+			course1CurveStartPoint = courseplay:coordDistFromEndPoint(segEnd, segStart, -remainingDistance)
+		end
+	end
+	
+	-- Determine <course2CurveEndPoint> on course2 <mergeRadius> meters after the intersection point
+	local course2CurveEndPoint;
+	segStart = intersectionPoint;
+	segEnd = course2[course2WaypointIndex];
+	remainingDistance = mergeRadius;
+	while course2CurveEndPoint == nil do
+		remainingDistance = remainingDistance - courseplay:distance(segStart.cx, segStart.cz, segEnd.cx, segEnd.cz);
+		if remainingDistance > 0 then
+			if course2WaypointIndex < course2LastWaypointIndex then
+				segStart = segEnd;
+				course2WaypointIndex = course2WaypointIndex + 1;
+				segEnd = course2[course2WaypointIndex];
+			else
+				course2CurveEndPoint = segEnd
+			end
+		else
+			course2CurveEndPoint = courseplay:coordDistFromEndPoint(segEnd, segStart, -remainingDistance)
+		end
+	end
+	
+	-- if one of the courses is short then determine the shortest as the <actualRadius>
+	local actualRadius = math.min(
+		courseplay:distance(course1CurveStartPoint.cx, course1CurveStartPoint.cz, intersectionPoint.cx, intersectionPoint.cz), 
+		courseplay:distance(course2CurveEndPoint.cx, course2CurveEndPoint.cz, intersectionPoint.cx, intersectionPoint.cz)
+	);
+
+	local turnWaypoints = {};
+
+	local p1 = courseplay:coordDistFromEndPoint(course1CurveStartPoint, intersectionPoint, actualRadius / 2);
+	local p2 = courseplay:coordDistFromEndPoint(course2CurveEndPoint, intersectionPoint, actualRadius / 2);
+
+	local turnPointCount = math.max(math.floor(actualRadius * 0.5 + 0.5), 2);
+
+	-- insert the curves points into <turnWaypoints>
+	for turnPointIndex = 0, turnPointCount do
+		table.insert(turnWaypoints, CalculateBezierPoint(turnPointIndex / turnPointCount, course1CurveStartPoint, p1, p2, course2CurveEndPoint));
+	end
+	
+	-- return the curves points and the last waypoint index of course 1 <course1WaypointIndex> and the first point index of course 2<course2WaypointIndex>
+	return turnWaypoints, course1WaypointIndex, course2WaypointIndex;
+end
