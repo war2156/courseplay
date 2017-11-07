@@ -1748,6 +1748,82 @@ function courseplay:toggleTurn(vehicle)
 	courseplay.signs:updateWaypointSigns(vehicle, 'current');
 end;
 
+function courseplay:moveWpPerpendicular(vehicle, inc)
+	local dist = math.abs(inc);
+	local cp = vehicle.Waypoints[vehicle.cp.waypointIndex];
+	local moveAngle;
+
+	if #vehicle.Waypoints >= 3 then
+		if vehicle.cp.waypointIndex == 1 then
+			local pp = vehicle.Waypoints[vehicle.cp.waypointIndex + 1];
+			local pp2 = vehicle.Waypoints[vehicle.cp.waypointIndex + 2];
+			if inc < 0 then
+				moveAngle = math.atan2(pp.cz - pp2.cz, pp.cx - pp2.cx) + math.pi * 0.5
+			else
+				moveAngle = math.atan2(pp.cz - pp2.cz, pp.cx - pp2.cx) + math.pi * 1.5;
+			end
+		elseif vehicle.cp.waypointIndex == #vehicle.Waypoints then
+			local pp = vehicle.Waypoints[vehicle.cp.waypointIndex - 1];
+			local pp2 = vehicle.Waypoints[vehicle.cp.waypointIndex - 2];
+			if inc > 0 then
+				moveAngle = math.atan2(pp.cz - pp2.cz, pp.cx - pp2.cx) + math.pi * 0.5;
+			else
+				moveAngle = math.atan2(pp.cz - pp2.cz, pp.cx - pp2.cx) + math.pi * 1.5;
+			end
+		else
+			local pp = vehicle.Waypoints[vehicle.cp.waypointIndex - 1];
+			local np = vehicle.Waypoints[vehicle.cp.waypointIndex + 1];
+			if inc > 0 then
+				moveAngle = math.atan2(np.cz - pp.cz, np.cx - pp.cx) + math.pi * 0.5;
+			else
+				moveAngle = math.atan2(np.cz - pp.cz, np.cx - pp.cx) + math.pi * 1.5;
+			end
+		end
+		cp.cx = cp.cx + dist * math.cos(moveAngle);
+		cp.cz = cp.cz + dist * math.sin(moveAngle);
+		cp.cy = nil;
+		courseplay.signs:updateWaypointSigns(vehicle, 'current');
+	end
+end;
+
+function courseplay:moveWpParallel(vehicle, inc)
+	local dist = math.abs(inc);
+	local cp = vehicle.Waypoints[vehicle.cp.waypointIndex];
+	local moveAngle;
+
+	if #vehicle.Waypoints >= 3 then
+		if vehicle.cp.waypointIndex == 1 then
+			local pp = vehicle.Waypoints[vehicle.cp.waypointIndex + 1];
+			local pp2 = vehicle.Waypoints[vehicle.cp.waypointIndex + 2];
+			if inc < 0 then
+				moveAngle = math.atan2(pp.cz - pp2.cz, pp.cx - pp2.cx)
+			else
+				moveAngle = math.atan2(pp.cz - pp2.cz, pp.cx - pp2.cx) + math.pi;
+			end
+		elseif vehicle.cp.waypointIndex == #vehicle.Waypoints then
+			local pp = vehicle.Waypoints[vehicle.cp.waypointIndex - 1];
+			local pp2 = vehicle.Waypoints[vehicle.cp.waypointIndex - 2];
+			if inc > 0 then
+				moveAngle = math.atan2(pp.cz - pp2.cz, pp.cx - pp2.cx)
+			else
+				moveAngle = math.atan2(pp.cz - pp2.cz, pp.cx - pp2.cx) + math.pi;
+			end
+		else
+			local pp = vehicle.Waypoints[vehicle.cp.waypointIndex - 1];
+			local np = vehicle.Waypoints[vehicle.cp.waypointIndex + 1];
+			if inc > 0 then
+				moveAngle = math.atan2(np.cz - pp.cz, np.cx - pp.cx);
+			else
+				moveAngle = math.atan2(np.cz - pp.cz, np.cx - pp.cx) + math.pi;
+			end
+		end
+		cp.cx = cp.cx + dist * math.cos(moveAngle);
+		cp.cz = cp.cz + dist * math.sin(moveAngle);
+		cp.cy = nil;
+		courseplay.signs:updateWaypointSigns(vehicle, 'current');
+	end
+end;
+
 function courseplay:changeWaypointSpeed(vehicle, inc)
 	local maxSpeed = vehicle.cp.speeds.max;
 	if inc == 4 then

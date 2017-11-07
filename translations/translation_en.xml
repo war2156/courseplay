@@ -305,6 +305,10 @@
 		<text name="input_COURSEPLAY_TOGGLETURN" 						 text="Courseplay: Toggle Turn Start and Turn End on the current waypoint" />
 		<text name="input_COURSEPLAY_INCREASEWPSPEED" 					 text="Courseplay: Increase waypoint speed" />
 		<text name="input_COURSEPLAY_DECREASEWPSPEED" 					 text="Courseplay: Decrease waypoint speed" />
+		<text name="input_COURSEPLAY_MOVEWPLEFT" 						 text="Courseplay: Move waypoint left" />
+		<text name="input_COURSEPLAY_MOVEWPRIGHT" 						 text="Courseplay: Move waypoint right" />
+		<text name="input_COURSEPLAY_MOVEWFORWARD" 						 text="Courseplay: Move waypoint forward" />
+		<text name="input_COURSEPLAY_MOVEWPBACKWARD" 					 text="Courseplay: Move waypoint backward" />
 		<text name="COURSEPLAY_MOUSEARROW_SHOW" 						 text="show mouse cursor" />
 		<text name="COURSEPLAY_MOUSEARROW_HIDE" 						 text="hide mouse cursor" />
 	

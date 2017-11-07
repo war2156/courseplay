@@ -976,6 +976,26 @@ function courseplay:update(dt)
 					end
 					self:setCourseplayFunc('changeWaypointSpeed', inc, false);
 				end
+			elseif not self.cp.isRecording and InputBinding.isPressed(InputBinding.COURSEPLAY_MOVEWPLEFT) then
+				if courseplay:keyboardShouldExecuteRepeatingKeyBinding(dt, InputBinding.COURSEPLAY_MOVEWPLEFT) then
+					local inc = courseplay:keyboardGetTimeRangedValue(3000, 0.01, 1.000);
+					self:setCourseplayFunc('moveWpPerpendicular', -inc, false);
+				end
+			elseif not self.cp.isRecording and InputBinding.isPressed(InputBinding.COURSEPLAY_MOVEWPRIGHT) then
+				if courseplay:keyboardShouldExecuteRepeatingKeyBinding(dt, InputBinding.COURSEPLAY_MOVEWPRIGHT) then
+					local inc = courseplay:keyboardGetTimeRangedValue(3000, 0.01, 1.000);
+					self:setCourseplayFunc('moveWpPerpendicular', inc, false);
+				end
+			elseif not self.cp.isRecording and InputBinding.isPressed(InputBinding.COURSEPLAY_MOVEWPFORWARD) then
+				if courseplay:keyboardShouldExecuteRepeatingKeyBinding(dt, InputBinding.COURSEPLAY_MOVEWPFORWARD) then
+					local inc = courseplay:keyboardGetTimeRangedValue(3000, 0.01, 1.000);
+					self:setCourseplayFunc('moveWpParallel', inc, false);
+				end
+			elseif not self.cp.isRecording and InputBinding.isPressed(InputBinding.COURSEPLAY_MOVEWPBACKWARD) then
+				if courseplay:keyboardShouldExecuteRepeatingKeyBinding(dt, InputBinding.COURSEPLAY_MOVEWPBACKWARD) then
+					local inc = courseplay:keyboardGetTimeRangedValue(3000, 0.01, 1.000);
+					self:setCourseplayFunc('moveWpParallel', -inc, false);
+				end
 			end;
 
 			if not self.cp.openHudWithMouse and InputBinding.hasEvent(InputBinding.COURSEPLAY_HUD) then
