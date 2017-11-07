@@ -1748,6 +1748,44 @@ function courseplay:toggleTurn(vehicle)
 	courseplay.signs:updateWaypointSigns(vehicle, 'current');
 end;
 
+function courseplay:changeWaypointSpeed(vehicle, inc)
+	local maxSpeed = vehicle.cp.speeds.max;
+	if inc == 4 then
+		for i = 1, #vehicle.Waypoints do
+			local speed = vehicle.Waypoints[i].speed + math.floor((maxSpeed + 1) / 6.0 + .5);
+			vehicle.Waypoints[i].speed = Utils.clamp(speed, 0, maxSpeed)
+		end
+	elseif inc == -4 then
+		for i = 1, #vehicle.Waypoints do
+			local speed = vehicle.Waypoints[i].speed - math.floor((maxSpeed + 1) / 6.0 + .5);
+			vehicle.Waypoints[i].speed = Utils.clamp(speed, 0, maxSpeed)
+		end
+	elseif inc == 3 then
+		for i = 1, #vehicle.Waypoints do
+			local speed = vehicle.Waypoints[i].speed + 1;
+			vehicle.Waypoints[i].speed = Utils.clamp(speed, 0, maxSpeed)
+		end
+	elseif inc == -3 then
+		for i = 1, #vehicle.Waypoints do
+			local speed = vehicle.Waypoints[i].speed - 1;
+			vehicle.Waypoints[i].speed = Utils.clamp(speed, 0, maxSpeed)
+		end
+	else
+		local wp = vehicle.Waypoints[vehicle.cp.waypointIndex];
+		local speed = wp.speed;
+		if inc == 1 then
+			speed = speed + 1;
+		elseif inc == 2 then
+			speed = speed + math.floor((maxSpeed + 1) / 6.0 + .5);
+		elseif inc == -1 then
+			speed = speed - 1;
+		elseif inc == -2 then
+			speed = speed - math.floor((maxSpeed + 1) / 6.0 + .5);
+		end
+		wp.speed = Utils.clamp(speed, 0, maxSpeed)
+	end
+end;
+
 function courseplay:getIsCourseplayDriving()
 	return self.cp.isDriving;
 end;

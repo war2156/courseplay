@@ -952,6 +952,30 @@ function courseplay:update(dt)
 				self:setCourseplayFunc('toggleReverse', null, false);
 			elseif not self.cp.isRecording and InputBinding.hasEvent(InputBinding.COURSEPLAY_TOGGLETURN) then
 				self:setCourseplayFunc('toggleTurn', null, false);
+			elseif not self.cp.isRecording and InputBinding.isPressed(InputBinding.COURSEPLAY_INCREASEWPSPEED) then
+				if courseplay:keyboardShouldExecuteRepeatingKeyBinding(dt, InputBinding.COURSEPLAY_INCREASEWPSPEED) then
+					local inc = 1;
+					if Input.isKeyPressed(Input.KEY_space) and Input.isKeyPressed(Input.KEY_lalt) then
+						inc = 4;
+					elseif Input.isKeyPressed(Input.KEY_lalt) then
+						inc = 2;
+					elseif Input.isKeyPressed(Input.KEY_space) then
+						inc = 3;
+					end
+					self:setCourseplayFunc('changeWaypointSpeed', inc, false);
+				end
+			elseif not self.cp.isRecording and InputBinding.isPressed(InputBinding.COURSEPLAY_DECREASEWPSPEED) then
+				if courseplay:keyboardShouldExecuteRepeatingKeyBinding(dt, InputBinding.COURSEPLAY_DECREASEWPSPEED) then
+					local inc = -1;
+					if Input.isKeyPressed(Input.KEY_space) and Input.isKeyPressed(Input.KEY_lalt) then
+						inc = -4;
+					elseif Input.isKeyPressed(Input.KEY_lalt) then
+						inc = -2;
+					elseif Input.isKeyPressed(Input.KEY_space) then
+						inc = -3;
+					end
+					self:setCourseplayFunc('changeWaypointSpeed', inc, false);
+				end
 			end;
 
 			if not self.cp.openHudWithMouse and InputBinding.hasEvent(InputBinding.COURSEPLAY_HUD) then
