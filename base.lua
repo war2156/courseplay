@@ -996,6 +996,10 @@ function courseplay:update(dt)
 					local inc = courseplay:keyboardGetTimeRangedValue(3000, 0.01, 1.000);
 					self:setCourseplayFunc('moveWpParallel', -inc, false);
 				end
+			elseif not self.cp.isRecording and InputBinding.hasEvent(InputBinding.COURSEPLAY_INSERTNEWWP) then
+				self:setCourseplayFunc('insertNewWaypoint', null, false);
+			elseif not self.cp.isRecording and InputBinding.hasEvent(InputBinding.COURSEPLAY_DELETEWP) then
+				self:setCourseplayFunc('deleteWaypoint', null, false);
 			end;
 
 			if not self.cp.openHudWithMouse and InputBinding.hasEvent(InputBinding.COURSEPLAY_HUD) then

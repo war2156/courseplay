@@ -1716,6 +1716,29 @@ function courseplay:setWaypointIndex(vehicle, number)
 	end;
 end;
 
+function courseplay:insertNewWaypoint(vehicle)
+	if vehicle.cp.waypointIndex < #vehicle.Waypoints then
+		local wp = vehicle.Waypoints[vehicle.cp.waypointIndex];
+		local nextWp = vehicle.Waypoints[vehicle.cp.waypointIndex + 1];
+		local newWp = courseplay.utils.table.copy(wp, true);
+		newWp.cx = wp.cx + (nextWp.cx - wp.cx) / 2; 
+		newWp.cz = wp.cz + (nextWp.cz - wp.cz) / 2; 
+		newWp.cy = nil;
+		vehicle.cp.waypointIndex = vehicle.cp.waypointIndex + 1;
+		table.insert(vehicle.Waypoints, vehicle.cp.waypointIndex, newWp);
+
+		courseplay.signs:updateWaypointSigns(vehicle, 'current');
+	end
+end;
+
+function courseplay:deleteWaypoint(vehicle)
+	if vehicle.cp.waypointIndex > 1 and vehicle.cp.waypointIndex < #vehicle.Waypoints then
+		table.remove(vehicle.Waypoints, vehicle.cp.waypointIndex);
+		vehicle.cp.waypointIndex = vehicle.cp.waypointIndex - 1;
+		courseplay.signs:updateWaypointSigns(vehicle, 'current');
+	end
+end;
+
 function courseplay:toggleWait(vehicle)
 	local wp = vehicle.Waypoints[vehicle.cp.waypointIndex];
 	wp.wait = not wp.wait;

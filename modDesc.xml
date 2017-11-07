@@ -129,6 +129,8 @@ Courseplay is a modification for Farming Simulator 17. It allows you to have man
 		<input name="COURSEPLAY_MOVEWPRIGHT"			category="VEHICLE"	key1="KEY_right"		key2="" button="" device="0" mouse=""					/>
 		<input name="COURSEPLAY_MOVEWPBACKWARD"			category="VEHICLE"	key1="KEY_down"			key2="" button="" device="0" mouse=""					/>
 		<input name="COURSEPLAY_MOVEWPFORWARD"			category="VEHICLE"	key1="KEY_up"			key2="" button="" device="0" mouse=""					/>
+		<input name="COURSEPLAY_INSERTNEWWP"			category="VEHICLE"	key1="KEY_insert"		key2="" button="" device="0" mouse=""					/>
+		<input name="COURSEPLAY_DELETEWP"				category="VEHICLE"	key1="KEY_backspace"	key2="" button="" device="0" mouse=""					/>
 	</inputBindings>
 
 </modDesc>
