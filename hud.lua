@@ -454,10 +454,10 @@ function courseplay.hud:setContent(vehicle)
 		end
 
 		vehicle.cp.hud.content.bottomInfo.editCourseInfo = ("Waypoint: %s%s%s%s%sx=%.2f z=%.2f a=%.2f s=%.1f%s"):format(waitStr, unloadStr, revStr, turnStartStr, turnEndStr, 
-			vehicle.Waypoints[vehicle.cp.waypointIndex].cx,
-			vehicle.Waypoints[vehicle.cp.waypointIndex].cz,
-			vehicle.Waypoints[vehicle.cp.waypointIndex].angle,
-			g_i18n:getSpeed(vehicle.Waypoints[vehicle.cp.waypointIndex].speed), 
+			vehicle.Waypoints[vehicle.cp.waypointIndex].cx or 0,
+			vehicle.Waypoints[vehicle.cp.waypointIndex].cz or 0,
+			vehicle.Waypoints[vehicle.cp.waypointIndex].angle or 0,
+			g_i18n:getSpeed(vehicle.Waypoints[vehicle.cp.waypointIndex].speed or 0), 
 			courseplay:getSpeedMeasuringUnit()
 		);
 	else
