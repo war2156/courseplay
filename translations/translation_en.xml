@@ -299,6 +299,10 @@
 		<text name="input_COURSEPLAY_MOUSEACTION_SECONDARY" 			 text="Courseplay: secondary mouse action" />
 		<text name="input_COURSEPLAY_NEXTWAYPOINT" 						 text="Courseplay: Change to next waypoint" />
 		<text name="input_COURSEPLAY_PREVWAYPOINT" 						 text="Courseplay: Change to previous waypoint" />
+		<text name="input_COURSEPLAY_TOGGLEWAIT" 						 text="Courseplay: Toggle Wait on the current waypoint" />
+		<text name="input_COURSEPLAY_TOGGLEUNLOAD" 						 text="Courseplay: Toggle Unload on the current waypoint" />
+		<text name="input_COURSEPLAY_TOGGLEREVERSE" 					 text="Courseplay: Toggle Reverse on the current waypoint" />
+		<text name="input_COURSEPLAY_TOGGLETURN" 						 text="Courseplay: Toggle Turn Start and Turn End on the current waypoint" />
 		<text name="COURSEPLAY_MOUSEARROW_SHOW" 						 text="show mouse cursor" />
 		<text name="COURSEPLAY_MOUSEARROW_HIDE" 						 text="hide mouse cursor" />
 	

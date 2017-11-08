@@ -1716,6 +1716,38 @@ function courseplay:setWaypointIndex(vehicle, number)
 	end;
 end;
 
+function courseplay:toggleWait(vehicle)
+	local wp = vehicle.Waypoints[vehicle.cp.waypointIndex];
+	wp.wait = not wp.wait;
+	courseplay.signs:updateWaypointSigns(vehicle, 'current');
+end;
+
+function courseplay:toggleUnload(vehicle)
+	local wp = vehicle.Waypoints[vehicle.cp.waypointIndex];
+	wp.unload = not wp.unload;
+	courseplay.signs:updateWaypointSigns(vehicle, 'current');
+end;
+
+function courseplay:toggleReverse(vehicle)
+	local wp = vehicle.Waypoints[vehicle.cp.waypointIndex];
+	wp.rev = not wp.rev;
+end;
+
+function courseplay:toggleTurn(vehicle)
+	local wp = vehicle.Waypoints[vehicle.cp.waypointIndex];
+	if wp.turnStart then
+		wp.turnStart = false;
+		wp.turnEnd = true;
+	elseif wp.turnEnd then
+		wp.turnStart = false;
+		wp.turnEnd = false;
+	else
+		wp.turnStart = true;
+		wp.turnEnd = false;
+	end
+	courseplay.signs:updateWaypointSigns(vehicle, 'current');
+end;
+
 function courseplay:getIsCourseplayDriving()
 	return self.cp.isDriving;
 end;

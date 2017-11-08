@@ -944,6 +944,14 @@ function courseplay:update(dt)
 						self:setCourseplayFunc('setWaypointIndex', self.cp.waypointIndex - 1, false);
 					end
 				end
+			elseif not self.cp.isRecording and InputBinding.hasEvent(InputBinding.COURSEPLAY_TOGGLEWAIT) then
+				self:setCourseplayFunc('toggleWait', null, false);
+			elseif not self.cp.isRecording and InputBinding.hasEvent(InputBinding.COURSEPLAY_TOGGLEUNLOAD) then
+				self:setCourseplayFunc('toggleUnload', null, false);
+			elseif not self.cp.isRecording and InputBinding.hasEvent(InputBinding.COURSEPLAY_TOGGLEREVERSE) then
+				self:setCourseplayFunc('toggleReverse', null, false);
+			elseif not self.cp.isRecording and InputBinding.hasEvent(InputBinding.COURSEPLAY_TOGGLETURN) then
+				self:setCourseplayFunc('toggleTurn', null, false);
 			end;
 
 			if not self.cp.openHudWithMouse and InputBinding.hasEvent(InputBinding.COURSEPLAY_HUD) then
