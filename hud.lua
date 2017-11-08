@@ -150,6 +150,7 @@ function courseplay.hud:setup()
 		bottomInfoSmall = self:pxToNormal(13, 'y');
 		version = self:pxToNormal(11, 'y');
 		infoText = self:pxToNormal(16, 'y');
+		editCourseInfo = self:pxToNormal(13, 'y');
 	};
 	self.numPages = 10;
 	self.numLines = 8;
@@ -201,6 +202,8 @@ function courseplay.hud:setup()
 	};
 
 	self.versionPosY = self.visibleArea.y1 + self:pxToNormal(16, 'y');
+	self.editCourseInfoY = self.visibleArea.y1 + self:pxToNormal(3, 'y');
+	self.editCourseInfoX = self.contentMaxX - self:pxToNormal(65, 'x');
 
 	-- PAGE TITLES
 	self.pageTitles = {
@@ -430,6 +433,37 @@ function courseplay.hud:setContent(vehicle)
 		vehicle.cp.hud.content.bottomInfo.courseNameText = courseplay:loc('COURSEPLAY_NO_COURSE_LOADED');
 	end;
 
+	
+	local wp = vehicle.Waypoints[vehicle.cp.waypointIndex];
+	if wp then
+		local waitStr, unloadStr, revStr, turnStartStr, turnEndStr = '', '', '', '', '';
+		if wp.wait then
+			waitStr =  "W ";
+		end
+		if wp.unload then
+			unloadStr = "U ";
+		end
+		if wp.rev then
+			revStr = "R ";
+		end
+		if wp.turnStart then
+			turnStartStr = "TS ";
+		end
+		if wp.turnEnd then
+			turnEndStr = "TE ";
+		end
+
+		vehicle.cp.hud.content.bottomInfo.editCourseInfo = ("Waypoint: %s%s%s%s%sx=%.2f z=%.2f a=%.2f s=%.1f%s"):format(waitStr, unloadStr, revStr, turnStartStr, turnEndStr, 
+			vehicle.Waypoints[vehicle.cp.waypointIndex].cx,
+			vehicle.Waypoints[vehicle.cp.waypointIndex].cz,
+			vehicle.Waypoints[vehicle.cp.waypointIndex].angle,
+			g_i18n:getSpeed(vehicle.Waypoints[vehicle.cp.waypointIndex].speed), 
+			courseplay:getSpeedMeasuringUnit()
+		);
+	else
+		vehicle.cp.hud.content.bottomInfo.editCourseInfo = nil;
+	end
+
 	if vehicle.Waypoints[vehicle.cp.waypointIndex] ~= nil or vehicle.cp.isRecording or vehicle.cp.recordingIsPaused or g_server == nil then
 		-- waypoints
 		if not vehicle.cp.isRecording and not vehicle.cp.recordingIsPaused then
@@ -567,6 +601,11 @@ function courseplay.hud:renderHud(vehicle)
 		courseplay:setFontSettings('white', false, 'right');
 		renderText(self.contentMaxX, self.versionPosY, self.fontSizes.version, courseplay.versionDisplayStr);
 	end;
+
+	if vehicle.cp.hud.content.bottomInfo.editCourseInfo ~= nil then
+		courseplay:setFontSettings('white', false, 'right');
+		renderText(self.editCourseInfoX, self.editCourseInfoY, self.fontSizes.editCourseInfo, vehicle.cp.hud.content.bottomInfo.editCourseInfo);
+	end
 
 
 	-- HUD TITLES
